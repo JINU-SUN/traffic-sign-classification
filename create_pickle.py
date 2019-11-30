@@ -8,21 +8,11 @@ import pandas as pd
 import tensorflow as tf
 from tensorflow.keras import datasets, layers, models
 from tensorflow.keras.layers import Conv2D, MaxPool2D, Dropout, Flatten, Dense
+from tensorflow.keras.models import Model
+import pickle
+import gzip
 import sys
 
-#tf.debugging.set_log_device_placement(True)
-#tf.config.gpu_options.allow_growth = True
-gpus = tf.config.experimental.list_physical_devices('GPU')
-if gpus:
-  # 텐서플로가 첫 번째 GPU만 사용하도록 제한
-  try:
-    tf.config.experimental.set_visible_devices(gpus[0], 'GPU')
-  except RuntimeError as e:
-    # 프로그램 시작시에 접근 가능한 장치가 설정되어야만 합니다
-    print(e)
-
-def get_label_from_path(path):
-    return int(path.split('/')[-2])
 
 # HEAD : Width  Height  Roi.X1  Roi.Y1  Roi.X2  Roi.Y2  ClassId  Path
 train_csv = pd.read_csv('data/gtsrb-german-traffic-sign/Train.csv')
@@ -42,8 +32,7 @@ test_label_name_list = test_csv['ClassId']
 unique_label_names = np.unique(test_label_name_list)
 
 # Hyper Parameter 
-batch_size = 64
-data_height = 32
+data_height = 32 
 data_width = 32
 channel_n = 3
 num_classes = len(unique_label_names)
@@ -54,13 +43,6 @@ train_labels = np.array(train_label_name_list)
 
 test_images = np.zeros((len(test_list), data_height, data_width, channel_n))
 test_labels = np.array(test_label_name_list)
-
-def read_image(path):
-    path = base_data_path + '/' + path
-    image = Image.open(path).resize((data_height, data_width))
-    image = np.array(image.convert('L'))
-    # Channel 1을 살려주기 위해 reshape 해줌
-    return image.reshape(data_height, data_width, 1)
 
 # 간단한 batch data 만들기
 for n, path in enumerate(train_list):
@@ -99,52 +81,16 @@ for n, path in enumerate(test_list):
     image = image.reshape(data_height, data_width, channel_n)
 
     test_images[n, :, :, :] = image
-    
-#Randomize the order of the input images
-s = np.arange(train_images.shape[0])
-#np.random.seed(43)
-np.random.shuffle(s)
-train_images = train_images[s]
-train_labels = train_labels[s]
-
-s = np.arange(test_images.shape[0])
-#np.random.seed(43)
-np.random.shuffle(s)
-test_images = test_images[s]
-test_labels = test_labels[s]
 
 
+with gzip.open('pickle/train_images.pickle', 'wb') as f:
+    pickle.dump(train_images, f)
 
-model = models.Sequential()
-"""
-model.add(layers.Conv2D(32, (3, 3), activation='relu', input_shape=(data_height, data_width, channel_n)))
-model.add(layers.MaxPooling2D((2, 2)))
-model.add(layers.Conv2D(64, (3, 3), activation='relu'))
-model.add(layers.MaxPooling2D((2, 2)))
-"""
-model.add(Conv2D(filters=6, kernel_size=(5,5), activation='relu', input_shape=(data_height, data_width, channel_n)))
-model.add(MaxPool2D(pool_size=(2, 2)))
-model.add(Conv2D(filters=16, kernel_size=(5, 5), activation='relu'))
-model.add(MaxPool2D(pool_size=(2, 2)))
-model.add(Flatten())
-model.add(Dense(84, activation='relu'))
-model.add(Dropout(rate=0.5))
-model.add(Dense(43, activation='softmax'))
-"""
-model.summary()
+with gzip.open('pickle/train_labels.pickle', 'wb') as f:
+    pickle.dump(train_labels, f)
 
-model.add(layers.Flatten())
-model.add(layers.Dense(64, activation='relu'))
-model.add(layers.Dense(43, activation='softmax'))
-"""
-model.summary()
+with gzip.open('pickle/test_images.pickle', 'wb') as f:
+    pickle.dump(test_images, f)
 
-model.compile(optimizer='adam',
-              loss='sparse_categorical_crossentropy',
-              metrics=['accuracy'])
-
-model.fit(train_images, train_labels, epochs=20, batch_size=64)
-
-test_loss, test_acc = model.evaluate(test_images,  test_labels, verbose=2)
-
-print(test_loss, test_acc)
+with gzip.open('pickle/test_labels.pickle', 'wb') as f:
+    pickle.dump(test_labels, f)
