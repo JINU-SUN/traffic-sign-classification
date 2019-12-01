@@ -31,8 +31,8 @@ def init_gpu():
 
 # Hyper Parameter 
 batch_size = 64
-data_height = 28 
-data_width = 28
+data_height = 32 
+data_width = 32
 channel_n = 3
 num_classes = 43
 
@@ -66,37 +66,47 @@ def data():
 def create_model(train_images, train_labels, test_images, test_labels):
 	model = models.Sequential()
 		
-	model_choice = {{choice(['one', 'two'])}}
+	model_choice = {{choice(['one', 'two','three'])}}
 
 	if model_choice == 'one':
-		model.add(Conv2D(filters=32, kernel_size={{choice([3, 5])}}, activation='relu', input_shape=(32, 32, 3)))
+		model.add(Conv2D(filters=32, kernel_size=3, activation='relu', input_shape=(32, 32, 3)))
 		model.add(MaxPool2D(pool_size=(2, 2)))
-		model.add(Conv2D(filters=64, kernel_size={{choice([3, 5])}}, activation='relu'))
+		model.add(Dropout(0.25))
+		model.add(Conv2D(filters=64, kernel_size=3, activation='relu'))
 		model.add(MaxPool2D(pool_size=(2, 2)))
+		model.add(Dropout(0.25))
 
-	elif model_choice == 'two':	
-		model.add(Conv2D(filters=64, kernel_size={{choice([3, 5])}}, activation='relu', input_shape=(32, 32, 3)))
+	elif model_choice == 'two':
+		model.add(Conv2D(filters=32, kernel_size=3, activation='relu', input_shape=(32, 32, 3)))
+		model.add(Conv2D(filters=32, kernel_size=3, activation='relu', input_shape=(32, 32, 3)))
 		model.add(MaxPool2D(pool_size=(2, 2)))
-		model.add(Conv2D(filters=128, kernel_size={{choice([3, 5])}}, activation='relu'))
+		model.add(Dropout(0.25))
+		model.add(Conv2D(filters=64, kernel_size=3, activation='relu'))
 		model.add(MaxPool2D(pool_size=(2, 2)))
+		model.add(Dropout(0.25))
+		
+	elif model_choice == 'three':
+		model.add(Conv2D(filters=32, kernel_size=3, activation='relu', input_shape=(32, 32, 3)))
+		model.add(Conv2D(filters=32, kernel_size=3, activation='relu', input_shape=(32, 32, 3)))
+		model.add(MaxPool2D(pool_size=(2, 2)))
+		model.add(Dropout(0.25))
+		model.add(Conv2D(filters=64, kernel_size=3, activation='relu'))
+		model.add(Conv2D(filters=64, kernel_size=3, activation='relu'))
+		model.add(MaxPool2D(pool_size=(2, 2)))
+		model.add(Dropout(0.25))
+		
 
 	model.add(Flatten())
-	model.add(Dense({{choice([256, 512,1024])}}, activation='relu'))
-
-	model_choice = {{choice(['one', 'two'])}}
-	
-	if model_choice == 'two':
-		model.add(Dense({{choice([256, 512,1024])}}, activation='relu'))
-	
+	model.add(Dense({{choice([256, 512])}}, activation='relu'))	
 	model.add(Dense(43, activation='softmax'))
 	
 	model.compile(loss="sparse_categorical_crossentropy", optimizer={{choice(['adam', 'sgd'])}},
 			metrics=["accuracy"])
 	
-	result = model.fit(train_images, train_labels, epochs=5, batch_size={{choice([32, 64])}})
+	result = model.fit(train_images, train_labels, epochs=5, batch_size={{choice([64, 128])}}, validation_split=0.1, verbose = 2)
 
 	#get the highest validation accuracy of the training epochs
-	validation_acc = np.amax(result.history['acc']) 
+	validation_acc = np.amax(result.history['val_acc']) 
 	print('Best validation acc of epoch:', validation_acc)
 
 	return {'loss': -validation_acc, 'status': STATUS_OK, 'model': model}

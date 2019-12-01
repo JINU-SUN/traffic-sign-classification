@@ -82,6 +82,8 @@ for n, path in enumerate(test_list):
 
     test_images[n, :, :, :] = image
 
+train_images = train_images.astype('float32')/255 
+test_images = test_images.astype('float32')/255 
 
 with gzip.open('pickle/train_images.pickle', 'wb') as f:
     pickle.dump(train_images, f)
