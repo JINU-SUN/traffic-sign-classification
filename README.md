@@ -13,7 +13,7 @@ python create_pickle.py
 ```
 
 ## Pretrained Model
-미리 학습한 모델은 model directory에 존재하며 inferences.ipynb 를 통해 해당 모델을 load해서 사용한다.
+미리 학습한 모델은 model directory에 존재하며 <a href="https://github.com/JINU-SUN/traffic-sign-classification/blob/master/Inference.ipynb">Inference.ipynb</a> 를 통해 해당 모델을 load해서 사용한다.
 
 ## Train
-위에서 받은 Dataset을 가지고 train.ipynb를 통해 학습한다.
+위에서 받은 Dataset을 가지고 <a href='https://github.com/JINU-SUN/traffic-sign-classification/blob/master/Train.ipynb'>Train.ipynb</a>를 통해 학습한다.
