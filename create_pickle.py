@@ -15,14 +15,14 @@ import sys
 
 
 # HEAD : Width  Height  Roi.X1  Roi.Y1  Roi.X2  Roi.Y2  ClassId  Path
-train_csv = pd.read_csv('data/gtsrb-german-traffic-sign/Train.csv')
-test_csv = pd.read_csv('data/gtsrb-german-traffic-sign/Test.csv')
+train_csv = pd.read_csv('data/Train.csv')
+test_csv = pd.read_csv('data/Test.csv')
 
 train_list = train_csv['Path']  # 모든 경로들을 list로 반환
 test_list = test_csv['Path']
 
 #print(train_csv.iloc[1]['Width'])
-base_data_path = 'data/gtsrb-german-traffic-sign'
+base_data_path = 'data/'
 train_label_name_list = []
 test_label_name_list = []
 

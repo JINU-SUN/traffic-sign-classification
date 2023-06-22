@@ -18,9 +18,6 @@ import sys
 import pickle
 import gzip
 
-#tf.debugging.set_log_device_placement(True)
-#tf.config.gpu_options.allow_growth = True
-
 def init_gpu():
 	gpus = tf.config.experimental.list_physical_devices('GPU')
 	if gpus:
@@ -29,7 +26,7 @@ def init_gpu():
 		except RuntimeError as e:
 			print(e)
 
-# Hyper Parameter 
+# Hyper Parameter
 batch_size = 64
 data_height = 32 
 data_width = 32
@@ -65,8 +62,8 @@ def data():
 
 def create_model(train_images, train_labels, test_images, test_labels):
 	model = models.Sequential()
-		
-	model_choice = {{choice(['one', 'two','three'])}}
+
+	model_choice = {{choice(['one', 'two','three', 'four'])}}
 
 	if model_choice == 'one':
 		model.add(Conv2D(filters=32, kernel_size=3, activation='relu', input_shape=(32, 32, 3)))
@@ -84,7 +81,7 @@ def create_model(train_images, train_labels, test_images, test_labels):
 		model.add(Conv2D(filters=64, kernel_size=3, activation='relu'))
 		model.add(MaxPool2D(pool_size=(2, 2)))
 		model.add(Dropout(0.25))
-		
+
 	elif model_choice == 'three':
 		model.add(Conv2D(filters=32, kernel_size=3, activation='relu', input_shape=(32, 32, 3)))
 		model.add(Conv2D(filters=32, kernel_size=3, activation='relu', input_shape=(32, 32, 3)))
@@ -94,15 +91,21 @@ def create_model(train_images, train_labels, test_images, test_labels):
 		model.add(Conv2D(filters=64, kernel_size=3, activation='relu'))
 		model.add(MaxPool2D(pool_size=(2, 2)))
 		model.add(Dropout(0.25))
-		
+
+        elif model_choice == 'two':
+		model.add(Conv2D(filters=32, kernel_size=3, activation='relu', input_shape=(32, 32, 3)))
+		model.add(Conv2D(filters=32, kernel_size=3, activation='relu', input_shape=(32, 32, 3)))
+		model.add(MaxPool2D(pool_size=(2, 2)))
+		model.add(Dropout(0.25))
+
 
 	model.add(Flatten())
 	model.add(Dense({{choice([256, 512])}}, activation='relu'))	
 	model.add(Dense(43, activation='softmax'))
-	
+
 	model.compile(loss="sparse_categorical_crossentropy", optimizer={{choice(['adam', 'sgd'])}},
 			metrics=["accuracy"])
-	
+
 	result = model.fit(train_images, train_labels, epochs=5, batch_size={{choice([64, 128])}}, validation_split=0.1, verbose = 2)
 
 	#get the highest validation accuracy of the training epochs
@@ -113,9 +116,8 @@ def create_model(train_images, train_labels, test_images, test_labels):
 
 
 if __name__ == '__main__':
-
 	init_gpu()
-	
+
 	best_run, best_model = optim.minimize(model=create_model,
 			data=data,
 			algo=tpe.suggest,
